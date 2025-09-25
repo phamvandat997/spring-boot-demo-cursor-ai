@@ -9,8 +9,8 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-09-26T04:41:21+0700",
-    comments = "version: 1.5.5.Final, compiler: Eclipse JDT (IDE) 3.43.0.v20250819-1513, environment: Java 21.0.8 (Eclipse Adoptium)"
+    date = "2025-09-25T22:24:54+0000",
+    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.16 (Ubuntu)"
 )
 @Component
 public class UserMapperImpl implements UserMapper {
@@ -23,15 +23,15 @@ public class UserMapperImpl implements UserMapper {
 
         UserDto userDto = new UserDto();
 
-        userDto.setCreatedAt( user.getCreatedAt() );
+        userDto.setId( user.getId() );
+        userDto.setUsername( user.getUsername() );
         userDto.setEmail( user.getEmail() );
         userDto.setFirstName( user.getFirstName() );
-        userDto.setId( user.getId() );
-        userDto.setIsActive( user.getIsActive() );
         userDto.setLastName( user.getLastName() );
         userDto.setRole( user.getRole() );
+        userDto.setIsActive( user.getIsActive() );
+        userDto.setCreatedAt( user.getCreatedAt() );
         userDto.setUpdatedAt( user.getUpdatedAt() );
-        userDto.setUsername( user.getUsername() );
 
         return userDto;
     }
@@ -44,12 +44,12 @@ public class UserMapperImpl implements UserMapper {
 
         User.UserBuilder user = User.builder();
 
+        user.username( userDto.getUsername() );
         user.email( userDto.getEmail() );
+        user.password( userDto.getPassword() );
         user.firstName( userDto.getFirstName() );
         user.lastName( userDto.getLastName() );
-        user.password( userDto.getPassword() );
         user.role( userDto.getRole() );
-        user.username( userDto.getUsername() );
 
         return user.build();
     }
@@ -60,14 +60,14 @@ public class UserMapperImpl implements UserMapper {
             return;
         }
 
+        if ( userDto.getUsername() != null ) {
+            user.setUsername( userDto.getUsername() );
+        }
         if ( userDto.getEmail() != null ) {
             user.setEmail( userDto.getEmail() );
         }
         if ( userDto.getFirstName() != null ) {
             user.setFirstName( userDto.getFirstName() );
-        }
-        if ( userDto.getIsActive() != null ) {
-            user.setIsActive( userDto.getIsActive() );
         }
         if ( userDto.getLastName() != null ) {
             user.setLastName( userDto.getLastName() );
@@ -75,8 +75,8 @@ public class UserMapperImpl implements UserMapper {
         if ( userDto.getRole() != null ) {
             user.setRole( userDto.getRole() );
         }
-        if ( userDto.getUsername() != null ) {
-            user.setUsername( userDto.getUsername() );
+        if ( userDto.getIsActive() != null ) {
+            user.setIsActive( userDto.getIsActive() );
         }
     }
 
