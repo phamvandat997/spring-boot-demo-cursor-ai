@@ -7,6 +7,7 @@ import com.example.entity.ProductInventory;
 import com.example.repository.ProductCategoryRepository;
 import com.example.repository.ProductInventoryRepository;
 import com.example.repository.ProductRepository;
+import com.example.mapper.ProductMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,62 +27,56 @@ public class ProductService {
     @Autowired
     private ProductInventoryRepository inventoryRepository;
 
+    @Autowired
+    private ProductMapper productMapper;
+
     public List<ProductDto> getAll() {
-        return productRepository.findAll().stream().map(this::toDto).collect(Collectors.toList());
+        return productRepository.findAll().stream().map(productMapper::toDto).collect(Collectors.toList());
     }
 
     public Optional<ProductDto> getById(Long id) {
-        return productRepository.findById(id).map(this::toDto);
+        return productRepository.findById(id).map(productMapper::toDto);
     }
 
     public ProductDto create(ProductDto dto) {
-        Product entity = new Product();
-        copyToEntity(dto, entity);
+        Product entity = productMapper.toEntity(dto);
+        // Resolve references from ids to managed entities if provided
+        if (dto.getCategoryId() != null) {
+            ProductCategory category = categoryRepository.findById(dto.getCategoryId())
+                    .orElseThrow(() -> new RuntimeException("Category not found"));
+            entity.setCategory(category);
+        }
+        if (dto.getInventoryId() != null) {
+            ProductInventory inventory = inventoryRepository.findById(dto.getInventoryId())
+                    .orElseThrow(() -> new RuntimeException("Inventory not found"));
+            entity.setInventory(inventory);
+        }
         Product saved = productRepository.save(entity);
-        return toDto(saved);
+        return productMapper.toDto(saved);
     }
 
     public ProductDto update(Long id, ProductDto dto) {
         Product entity = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
-        copyToEntity(dto, entity);
+        productMapper.updateEntity(dto, entity);
+        if (dto.getCategoryId() != null) {
+            ProductCategory category = categoryRepository.findById(dto.getCategoryId())
+                    .orElseThrow(() -> new RuntimeException("Category not found"));
+            entity.setCategory(category);
+        }
+        if (dto.getInventoryId() != null) {
+            ProductInventory inventory = inventoryRepository.findById(dto.getInventoryId())
+                    .orElseThrow(() -> new RuntimeException("Inventory not found"));
+            entity.setInventory(inventory);
+        }
         Product saved = productRepository.save(entity);
-        return toDto(saved);
+        return productMapper.toDto(saved);
     }
 
     public void delete(Long id) {
         productRepository.deleteById(id);
     }
 
-    private void copyToEntity(ProductDto dto, Product entity) {
-        if (dto.getName() != null) entity.setName(dto.getName());
-        if (dto.getDesc() != null) entity.setDesc(dto.getDesc());
-        if (dto.getSku() != null) entity.setSku(dto.getSku());
-        if (dto.getPrice() != null) entity.setPrice(dto.getPrice());
-
-        if (dto.getCategoryId() != null) {
-            ProductCategory category = categoryRepository.findById(dto.getCategoryId())
-                    .orElseThrow(() -> new RuntimeException("Category not found"));
-            entity.setCategory(category);
-        }
-
-        if (dto.getInventoryId() != null) {
-            ProductInventory inventory = inventoryRepository.findById(dto.getInventoryId())
-                    .orElseThrow(() -> new RuntimeException("Inventory not found"));
-            entity.setInventory(inventory);
-        }
-    }
-
-    private ProductDto toDto(Product entity) {
-        ProductDto dto = new ProductDto();
-        dto.setId(entity.getId());
-        dto.setName(entity.getName());
-        dto.setDesc(entity.getDesc());
-        dto.setSku(entity.getSku());
-        dto.setPrice(entity.getPrice());
-        dto.setCategoryId(entity.getCategory() != null ? entity.getCategory().getId() : null);
-        dto.setInventoryId(entity.getInventory() != null ? entity.getInventory().getId() : null);
-        return dto;
-    }
+    // Manual mapping methods removed in favor of MapStruct ProductMapper
 }
 
